@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1020">
+    <title>SecureScan | Web Security Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-icon">盾</span>
+            <span>SecureScan<span class="brand-dot">.</span></span>
+        </a>
+        <span class="status-pill"><span class="status-dot"></span> LOCAL SECURITY LAB</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="eyebrow">WEB SECURITY · CONFIGURATION AUDIT</div>
+            <h1>See your website's<br><span>security posture.</span></h1>
+            <p class="hero-description">
+                Inspect HTTPS, HTTP security headers, cookie attributes and
+                basic CORS configuration with a lightweight Python scanner.
+            </p>
+        </section>
+
+        <section class="scan-card">
+            <div class="section-heading">
+                <div>
+                    <h2>Start a security scan</h2>
+                    <p>Enter a website URL you own or have permission to test.</p>
+                </div>
+                <span class="shield-icon">⌑</span>
+            </div>
+
+            <form id="scan-form">
+                <label for="target-url">TARGET URL</label>
+                <div class="input-row">
+                    <span class="url-icon">↗</span>
+                    <input id="target-url" name="url" type="url" placeholder="https://example.com" autocomplete="url"
+                        required>
+                    <button id="scan-button" type="submit">
+                        <span id="button-label">Run scan ↗</span>
+                    </button>
+                </div>
+                <p class="input-hint">Only scan authorized targets. The scanner runs locally.</p>
+            </form>
+
+            <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+        </section>
+
+        <section id="results" hidden>
+            <div class="results-heading">
+                <div>
+                    <div class="eyebrow">SCAN REPORT</div>
+                    <h2>Security findings</h2>
+                    <p id="scan-meta" class="muted"></p>
+                </div>
+                <button id="download-button" class="secondary-button" type="button">
+                    ↓ Export JSON
+                </button>
+            </div>
+
+            <div class="summary-grid">
+                <article class="summary-card">
+                    <span class="summary-label">TOTAL CHECKS</span>
+                    <strong id="total-count">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">PASSED</span>
+                    <strong id="passed-count" class="green-text">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">WARNINGS</span>
+                    <strong id="warning-count" class="amber-text">0</strong>
+                </article>
+                <article class="summary-card">
+                    <span class="summary-label">NEEDS REVIEW</span>
+                    <strong id="review-count" class="blue-text">0</strong>
+                </article>
+            </div>
+
+            <div class="findings-panel">
+                <div class="findings-title">
+                    <h3>Detailed findings</h3>
+                    <span id="http-status" class="status-pill">HTTP —</span>
+                </div>
+                <div id="findings-list"></div>
+            </div>
+
+            <p class="disclaimer">
+                These results identify configuration indicators, not confirmed
+                exploitable vulnerabilities. Review each finding in context.
+            </p>
+        </section>
+
+        <section class="info-grid">
+            <article class="info-card">
+                <span class="info-icon">⌁</span>
+                <h3>HTTPS & Headers</h3>
+                <p>Review HTTPS usage and common browser security headers.</p>
+            </article>
+            <article class="info-card">
+                <span class="info-icon">◈</span>
+                <h3>Cookie Checks</h3>
+                <p>Inspect Secure, HttpOnly and SameSite cookie attributes.</p>
+            </article>
+            <article class="info-card">
+                <span class="info-icon">⌘</span>
+                <h3>CORS Review</h3>
+                <p>Identify basic cross-origin response-header indicators.</p>
+            </article>
+        </section>
+
+        <footer>
+            <span>SecureScan · Educational Security Project</span>
+            <span>Python · Flask · JavaScript</span>
+        </footer>
+    </main>
+</body>
+
+</html>
