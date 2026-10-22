@@ -1,0 +1,66 @@
+{
+  "target": "https://example.com",
+  "scanned_at_utc": "2026-10-22T20:32:59.163149+00:00",
+  "status_code": 200,
+  "final_url": "https://example.com/",
+  "https_used": true,
+  "findings": [
+    {
+      "category": "HTTPS",
+      "severity": "Info",
+      "status": "PASS",
+      "details": "The supplied URL uses HTTPS.",
+      "recommendation": ""
+    },
+    {
+      "category": "content-security-policy",
+      "severity": "Medium",
+      "status": "WARNING",
+      "details": "Helps reduce risks from injected content such as XSS.",
+      "recommendation": "Define a Content-Security-Policy appropriate for the application."
+    },
+    {
+      "category": "strict-transport-security",
+      "severity": "Medium",
+      "status": "WARNING",
+      "details": "Tells browsers to use HTTPS for future connections.",
+      "recommendation": "Configure HSTS on HTTPS sites after checking deployment requirements."
+    },
+    {
+      "category": "x-content-type-options",
+      "severity": "Low",
+      "status": "WARNING",
+      "details": "Helps prevent MIME-type sniffing.",
+      "recommendation": "Set X-Content-Type-Options: nosniff."
+    },
+    {
+      "category": "x-frame-options",
+      "severity": "Low",
+      "status": "WARNING",
+      "details": "Provides protection against some clickjacking scenarios.",
+      "recommendation": "Set X-Frame-Options: DENY or SAMEORIGIN, or use CSP frame-ancestors."
+    },
+    {
+      "category": "referrer-policy",
+      "severity": "Low",
+      "status": "WARNING",
+      "details": "Controls how much referrer information browsers send.",
+      "recommendation": "Set an appropriate Referrer-Policy, such as strict-origin-when-cross-origin."
+    },
+    {
+      "category": "CORS",
+      "severity": "Info",
+      "status": "REVIEW",
+      "details": "No Access-Control-Allow-Origin header was observed.",
+      "recommendation": "Confirm whether cross-origin access is required for this application."
+    },
+    {
+      "category": "Cookies",
+      "severity": "Info",
+      "status": "REVIEW",
+      "details": "No Set-Cookie header was observed in this response.",
+      "recommendation": ""
+    }
+  ],
+  "error": null
+}
