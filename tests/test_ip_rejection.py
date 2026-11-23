@@ -1,18 +1,27 @@
-import pytest
+"""Tests for SSRF / private-IP rejection."""
+
 import socket
+
+import pytest
+
 from app import validate_public_target
 
-def mock_getaddrinfo_private(host, port, type):
-    return [(socket.AF_INET, socket.SOCK_STREAM, 6, '', ('10.0.0.1', port))]
 
-def mock_getaddrinfo_local(host, port, type):
-    return [(socket.AF_INET, socket.SOCK_STREAM, 6, '', ('127.0.0.1', port))]
+def _make_mock(ip):
+    """Return a mock getaddrinfo that always resolves to the given IP."""
+    def mock_getaddrinfo(host, port, **kwargs):
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", (ip, port))]
+    return mock_getaddrinfo
 
-def mock_getaddrinfo_linklocal(host, port, type):
-    return [(socket.AF_INET, socket.SOCK_STREAM, 6, '', ('169.254.0.1', port))]
 
-@pytest.mark.parametrize("mock_func", [mock_getaddrinfo_private, mock_getaddrinfo_local, mock_getaddrinfo_linklocal])
-def test_private_ip_rejection(mock_func, monkeypatch):
-    monkeypatch.setattr(socket, "getaddrinfo", mock_func)
-    with pytest.raises(ValueError):
+@pytest.mark.parametrize("ip", [
+    "127.0.0.1",       # loopback
+    "10.0.0.1",        # private class A
+    "192.168.1.1",     # private class C
+    "169.254.0.1",     # link-local
+    "::1",             # IPv6 loopback
+])
+def test_private_ip_rejected(ip, monkeypatch):
+    monkeypatch.setattr(socket, "getaddrinfo", _make_mock(ip))
+    with pytest.raises(ValueError, match="publicly routable"):
         validate_public_target("http://example.com")

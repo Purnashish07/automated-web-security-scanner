@@ -1,157 +1,153 @@
-const form = document.getElementById("scan-form");
-const targetInput = document.getElementById("target-url");
-const scanButton = document.getElementById("scan-button");
-const buttonLabel = document.getElementById("button-label");
-const message = document.getElementById("message");
-const results = document.getElementById("results");
-const scanMeta = document.getElementById("scan-meta");
-const downloadButton = document.getElementById("download-button");
-const findingsList = document.getElementById("findings-list");
+// ---------------------------------------------------------------------------
+// SecureScan – frontend client
+// ---------------------------------------------------------------------------
 
-let latestScan = null;
-
-function showMessage(text, type = "info") {
-    message.textContent = text;
-    message.className = `message ${type}`;
+function showMessage(text, type) {
+    const el = document.getElementById("message");
+    el.textContent = text;
+    el.className = "message " + type;
 }
 
-function updateCount(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = String(value);
+function hideMessage() {
+    const el = document.getElementById("message");
+    el.className = "message hidden";
 }
 
-function renderFindings(findings = []) {
-    findingsList.replaceChildren();
+// Build a single finding card using textContent only (no innerHTML).
+function renderFinding(f) {
+    const card = document.createElement("div");
+    card.className = "finding-card bg-[#1F2937] rounded-lg p-4 shadow mb-3";
 
-    if (findings.length === 0) {
-        const empty = document.createElement("p");
-        empty.textContent = "No findings were returned for this scan.";
-        findingsList.appendChild(empty);
-        return;
+    // Status + severity line
+    const top = document.createElement("div");
+    top.className = "flex items-center gap-2 mb-1";
+
+    const statusBadge = document.createElement("span");
+    statusBadge.className = "severity-badge " + (f.status || "").toLowerCase();
+    statusBadge.textContent = f.status || "";
+    top.appendChild(statusBadge);
+
+    const sevBadge = document.createElement("span");
+    sevBadge.className = "severity-badge " + (f.severity || "").toLowerCase();
+    sevBadge.textContent = f.severity || "";
+    top.appendChild(sevBadge);
+
+    card.appendChild(top);
+
+    // Category heading
+    const heading = document.createElement("h4");
+    heading.className = "finding-heading text-[#E5E7EB] mt-1 font-medium";
+    heading.textContent = f.category || "";
+    card.appendChild(heading);
+
+    // Details
+    const details = document.createElement("p");
+    details.className = "text-[#9CA3AF] mt-1 text-sm";
+    details.textContent = f.details || "";
+    card.appendChild(details);
+
+    // Recommendation (if any)
+    if (f.recommendation) {
+        const rec = document.createElement("p");
+        rec.className = "recommendation text-[#06B6D4] mt-1 text-sm italic";
+        rec.textContent = f.recommendation;
+        card.appendChild(rec);
     }
 
-    findings.forEach((finding) => {
-        const card = document.createElement("article");
-        card.className = "finding-card";
-
-        const heading = document.createElement("div");
-        heading.className = "finding-heading";
-
-        const category = document.createElement("h3");
-        category.textContent = finding.category || "General";
-
-        const badge = document.createElement("span");
-        const severity = String(finding.severity || "info").toLowerCase();
-        badge.className = `severity-badge ${severity}`;
-        badge.textContent = finding.status || finding.severity || "INFO";
-
-        heading.append(category, badge);
-
-        const details = document.createElement("p");
-        details.textContent = finding.details || "No additional details.";
-
-        const recommendation = document.createElement("p");
-        recommendation.className = "recommendation";
-        recommendation.textContent =
-            `Recommendation: ${finding.recommendation || "Review this finding."}`;
-
-        card.append(heading, details, recommendation);
-        findingsList.appendChild(card);
-    });
+    return card;
 }
 
-function displayScan(data) {
-    latestScan = data;
+// ---------------------------------------------------------------------------
+// Form submit handler
+// ---------------------------------------------------------------------------
+document.getElementById("scan-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    hideMessage();
 
-    const findings = Array.isArray(data.findings) ? data.findings : [];
-    const passed = findings.filter(
-        (item) => String(item.status).toUpperCase() === "PASS"
-    ).length;
-    const warnings = findings.filter(
-        (item) => String(item.status).toUpperCase() === "WARNING"
-    ).length;
-    const reviews = findings.filter(
-        (item) => String(item.status).toUpperCase() === "REVIEW"
-    ).length;
+    var urlInput = document.getElementById("target-url");
+    var button   = document.getElementById("scan-button");
+    var label    = document.getElementById("button-label");
+    var originalText = label.textContent;
 
-    updateCount("total-count", findings.length);
-    updateCount("passed-count", passed);
-    updateCount("warning-count", warnings);
-    updateCount("review-count", reviews);
-
-    const statusElement = document.getElementById("http-status");
-    if (statusElement) {
-        statusElement.textContent =
-            data.status_code != null ? `HTTP ${data.status_code}` : "N/A";
+    // Auto-prepend https:// if the user forgot
+    var targetUrl = urlInput.value.trim();
+    if (!/^https?:\/\//i.test(targetUrl)) {
+        targetUrl = "https://" + targetUrl;
     }
 
-    scanMeta.textContent =
-        `Target: ${data.final_url || data.target || "Unknown target"} · ` +
-        `Scanned at: ${data.scanned_at_utc || "N/A"}`;
-
-    renderFindings(findings);
-    results.hidden = false;
-    downloadButton.disabled = false;
-}
-
-form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const url = targetInput.value.trim();
-
-    if (!url) {
-        showMessage("Please enter a website URL.", "error");
-        targetInput.focus();
-        return;
-    }
-
-    scanButton.disabled = true;
-    buttonLabel.textContent = "Scanning...";
-    results.hidden = true;
-    downloadButton.disabled = true;
-    showMessage("Checking the target website. Please wait...", "info");
+    button.disabled = true;
+    label.textContent = "Scanning\u2026";
 
     try {
-        const response = await fetch("/api/scan", {
+        var resp = await fetch("/api/scan", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ url }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: targetUrl }),
         });
 
-        const data = await response.json();
+        var data = await resp.json();
 
-        if (!response.ok) {
-            throw new Error(data.error || `Scan failed (HTTP ${response.status}).`);
+        if (!resp.ok) {
+            showMessage(data.error || "Unexpected error", "error");
+            return;
         }
 
-        displayScan(data);
-        showMessage("Scan completed successfully.", "success");
-    } catch (error) {
-        showMessage(
-            error.message || "Something went wrong. Please try again.",
-            "error"
-        );
+        // --- Show results section ---
+        document.getElementById("results").hidden = false;
+
+        // HTTP status pill (inside the findings panel)
+        var statusPill = document.getElementById("http-status-pill");
+        if (statusPill) {
+            statusPill.textContent = "HTTP " + (data.status_code || "—");
+        }
+
+        // Scan meta line
+        var meta = document.getElementById("scan-meta");
+        if (meta) {
+            meta.textContent = data.target + " \u00b7 " +
+                new Date(data.scanned_at_utc).toLocaleString();
+        }
+
+        // --- Compute summary from findings ---
+        var findings = data.findings || [];
+        var passed   = 0;
+        var warnings = 0;
+        var review   = 0;
+        findings.forEach(function (f) {
+            if (f.status === "PASS")    passed++;
+            if (f.status === "WARNING") warnings++;
+            if (f.status === "REVIEW")  review++;
+        });
+
+        document.getElementById("total-count").textContent   = findings.length;
+        document.getElementById("passed-count").textContent  = passed;
+        document.getElementById("warning-count").textContent = warnings;
+        document.getElementById("review-count").textContent  = review;
+
+        // Render each finding card
+        var list = document.getElementById("findings-list");
+        list.textContent = "";          // clear previous results (no innerHTML)
+        findings.forEach(function (f) {
+            list.appendChild(renderFinding(f));
+        });
+
+        // Enable JSON download
+        var dlBtn = document.getElementById("download-button");
+        var blob  = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        dlBtn.disabled = false;
+        dlBtn.onclick = function () {
+            var a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "securescan-" + Date.now() + ".json";
+            a.click();
+        };
+
+        showMessage("Scan completed successfully!", "success");
+
+    } catch (err) {
+        showMessage("Could not reach the server \u2013 please try again later.", "error");
     } finally {
-        scanButton.disabled = false;
-        buttonLabel.textContent = "Run Security Scan";
+        button.disabled = false;
+        label.textContent = originalText;
     }
-});
-
-downloadButton.addEventListener("click", () => {
-    if (!latestScan) return;
-
-    const blob = new Blob([JSON.stringify(latestScan, null, 2)], {
-        type: "application/json",
-    });
-
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = "security-scan-report.json";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(objectUrl);
 });

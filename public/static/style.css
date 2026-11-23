@@ -1,61 +1,73 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* =================================================================
+   SecureScan – custom CSS overrides (Tailwind handles the rest)
+   ================================================================= */
 
-:root {
-    color-scheme: dark;
-    --bg: #090d18;
-    --panel: #111827;
-    --panel-light: #151f31;
-    --border: #253147;
-    --text: #edf2ff;
-    --muted: #94a3b8;
-    --accent: #7c83ff;
-    --green: #4adea3;
-    --amber: #fbbf60;
-    --blue: #83b7ff;
+/* --- Message box --- */
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
+.message.hidden  { display: none; }
+.message.error   { background: #7f1d1d; color: #fecaca; }
+.message.success { background: #064e3b; color: #a7f3d0; }
+.message.info    { background: #1e3a5f; color: #93c5fd; }
 
-* {box-sizing: border-box;}
-[hidden]{display:none !important;}
-body{margin:0;background:radial-gradient(ellipse at 50% 0%,#19244a 0%,transparent 48%),var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
-button,input{font:inherit;cursor:pointer;}
-/* Rest of original CSS unchanged */
-
-/* Additional UI classes required */
-.finding-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.finding-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-}
+/* --- Severity / status badges --- */
 .severity-badge {
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
 }
-.severity-badge.info { background: var(--panel-light); color: var(--muted); }
-.severity-badge.low { background: var(--green); color: #000; }
-.severity-badge.medium { background: var(--amber); color: #000; }
-.severity-badge.high { background: var(--blue); color: #000; }
+.severity-badge.pass    { background: #064e3b; color: #6ee7b7; }
+.severity-badge.warning { background: #78350f; color: #fcd34d; }
+.severity-badge.review  { background: #1e3a5f; color: #93c5fd; }
+.severity-badge.info    { background: #1e3a5f; color: #93c5fd; }
+.severity-badge.low     { background: #064e3b; color: #6ee7b7; }
+.severity-badge.medium  { background: #78350f; color: #fcd34d; }
+.severity-badge.high    { background: #7f1d1d; color: #fca5a5; }
+
+/* --- Finding card --- */
+.finding-card {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: border-color 0.2s;
+}
+.finding-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* --- Finding heading --- */
+.finding-heading {
+    font-size: 0.95rem;
+}
+
+/* --- Recommendation text --- */
 .recommendation {
-    margin-top: 4px;
     font-style: italic;
-    color: var(--muted);
 }
-.message.success { background: #1a2b1a; border-color: #2e5e2e; color: #a0ffa0; }
-.message.info { background: #1a2b3a; border-color: #2e3e5e; color: #a0c0ff; }
+
+/* --- Buttons --- */
+.secondary-button {
+    background: #1f2937;
+}
+.secondary-button:hover {
+    background: #374151;
+}
 #download-button:disabled,
 .secondary-button:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+}
+
+/* --- Info cards lift --- */
+.info-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.info-card:hover {
+    transform: translateY(-4px);
 }

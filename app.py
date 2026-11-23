@@ -1,6 +1,7 @@
-
 import ipaddress
 import socket
+import time
+from collections import defaultdict, deque
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
@@ -8,15 +9,18 @@ from flask import Flask, jsonify, render_template, request
 
 from security_scanner import scan_url, validate_url
 
-
+# ---------------------------------------------------------------------------
+# Flask app – static assets live under public/static/ for Vercel compat.
+# ---------------------------------------------------------------------------
 app = Flask(__name__, static_folder="public/static", static_url_path="/static")
-
-# Keep this development server local to your own computer.
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
 
-def validate_public_target(url):
-    """Validate the URL and reject hostnames resolving to non-public IPs."""
+# ---------------------------------------------------------------------------
+# SSRF guard: reject any hostname that resolves to a non-public IP.
+# ---------------------------------------------------------------------------
+def validate_public_target(url: str) -> str:
+    """Validate URL format and ensure the hostname resolves to a public IP."""
     validate_url(url)
     parsed = urlparse(url)
 
@@ -47,50 +51,73 @@ def validate_public_target(url):
     return url
 
 
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
 @app.get("/")
 def index():
     return render_template("index.html")
 
-# Simple in-memory rate limiting (per IP, 5 requests per minute)
-from collections import defaultdict, deque
-import time
-rate_limit_data = defaultdict(lambda: deque())
-RATE_LIMIT = 5
-RATE_WINDOW = 60
 
-def is_rate_limited(ip):
+# ---------------------------------------------------------------------------
+# Simple in-memory rate limiting (5 req/min per client IP).
+# Best-effort on serverless: each cold-start resets the counters.
+# ---------------------------------------------------------------------------
+rate_limit_data: dict[str, deque] = defaultdict(deque)
+RATE_LIMIT = 5
+RATE_WINDOW = 60  # seconds
+
+
+def _get_client_ip() -> str:
+    """Return the client IP from X-Forwarded-For (first value) or remote_addr."""
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def is_rate_limited(ip: str) -> bool:
     now = time.time()
     q = rate_limit_data[ip]
-    # Remove timestamps older than the window
+    # Discard timestamps outside the window
     while q and now - q[0] > RATE_WINDOW:
         q.popleft()
-    # If the deque is empty after cleanup, remove the key to avoid memory growth
+    # Clean up empty deques to prevent memory growth
     if not q:
-        # On serverless platforms each instance has its own memory, so this is best‑effort only
-        del rate_limit_data[ip]
-        return False
+        rate_limit_data.pop(ip, None)
     if len(q) >= RATE_LIMIT:
         return True
     q.append(now)
     return False
 
-# Note: The rate‑limit data is stored in‑memory per process. In a serverless environment each instance
-# gets its own isolated memory, so the limit is applied per‑instance. This cleanup ensures the dict
-# does not retain empty deques over time.
 
 @app.before_request
 def limit_requests():
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
-    if is_rate_limited(ip):
+    client_ip = _get_client_ip()
+    if is_rate_limited(client_ip):
         return jsonify({"error": "Rate limit exceeded. Try again later."}), 429
+
 
 @app.get("/api/health")
 def health():
     return jsonify({"status": "ok"})
 
+
+# ---------------------------------------------------------------------------
+# Security headers (CSP whitelists Tailwind CDN + Google Fonts)
+# ---------------------------------------------------------------------------
 @app.after_request
 def add_security_headers(response):
-    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none';"
+    )
+    response.headers["Content-Security-Policy"] = csp
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
@@ -98,6 +125,9 @@ def add_security_headers(response):
     return response
 
 
+# ---------------------------------------------------------------------------
+# Scan endpoint
+# ---------------------------------------------------------------------------
 @app.post("/api/scan")
 def api_scan():
     payload = request.get_json(silent=True)
@@ -116,10 +146,10 @@ def api_scan():
     except (ValueError, OSError) as exc:
         return jsonify({"error": str(exc)}), 400
 
-    # The original scanner follows redirects automatically. Avoid using it
-    # for untrusted public targets until redirects are revalidated per hop.
-    # This endpoint is intended for authorized testing only.
-    report = scan_url(url, timeout=10)
+    try:
+        report = scan_url(url, timeout=10)
+    except Exception as exc:
+        return jsonify({"error": f"Scanner failed: {exc}"}), 502
 
     if report.get("error"):
         return jsonify({
@@ -134,5 +164,8 @@ def api_scan():
     return jsonify(report)
 
 
+# ---------------------------------------------------------------------------
+# Local dev server
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=False)
+    app.run(host="127.0.0.1", port=5000, debug=True)

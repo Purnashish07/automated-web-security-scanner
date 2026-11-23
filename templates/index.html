@@ -1,127 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0b1020">
     <title>SecureScan | Web Security Scanner</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script src="/static/app.js" defer></script>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter + Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400&display=swap"
+          rel="stylesheet">
+
+    <!-- Custom CSS overrides -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
 </head>
 
-<body>
-    <header class="topbar">
-        <a class="brand" href="/">
-            <span class="brand-icon">盾</span>
-            <span>SecureScan<span class="brand-dot">.</span></span>
-        </a>
-        <span class="status-pill"><span class="status-dot"></span> HTTP <span id="http-status"></span></span>
+<body class="bg-[#0B1120] text-[#E5E7EB] font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- ===== Navbar ===== -->
+    <header class="sticky top-0 z-20 bg-[#0f172a]/80 backdrop-blur border-b border-white/5">
+        <nav class="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
+            <a href="/" class="flex items-center gap-2 text-xl font-bold text-[#00ffcc] hover:opacity-90 transition">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#00ffcc"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                SecureScan<span class="text-white/30">.</span>
+            </a>
+            <span class="flex items-center gap-2 text-sm font-mono text-[#9CA3AF]">
+                <span class="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+                READY
+            </span>
+        </nav>
     </header>
 
-    <main class="container">
-        <section class="hero">
-            <div class="eyebrow">WEB SECURITY · CONFIGURATION AUDIT</div>
-            <h1>See your website's<br><span>security posture.</span></h1>
-            <p class="hero-description">
-                Inspect HTTPS, HTTP security headers, cookie attributes and
-                basic CORS configuration with a lightweight Python scanner.
+    <!-- ===== Main ===== -->
+    <main class="flex-1 mx-auto w-full max-w-5xl px-4 sm:px-6 py-10 space-y-14">
+
+        <!-- Hero -->
+        <section class="text-center space-y-4">
+            <p class="text-xs sm:text-sm uppercase tracking-[0.25em] text-[#6B7280]">
+                WEB SECURITY &middot; CONFIGURATION AUDIT
+            </p>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
+                See your website&rsquo;s<br>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#10B981] to-[#06B6D4]">
+                    security posture.
+                </span>
+            </h1>
+            <p class="text-base sm:text-lg text-[#9CA3AF] max-w-2xl mx-auto">
+                Inspect HTTPS, HTTP security headers, cookie attributes and basic
+                CORS configuration with a lightweight Python scanner.
             </p>
         </section>
 
-        <section class="scan-card">
-            <div class="section-heading">
-                <div>
-                    <h2>Start a security scan</h2>
-                    <p>Enter a website URL you own or have permission to test.</p>
-                </div>
-                <span class="shield-icon">⌑</span>
-            </div>
+        <!-- Scan Card -->
+        <section class="bg-[#111827] rounded-2xl p-6 sm:p-8 shadow-xl ring-1 ring-white/5">
+            <h2 class="text-xl font-semibold mb-1">Start a security scan</h2>
+            <p class="text-sm text-[#9CA3AF] mb-5">
+                Enter a website URL you own or have permission to test.
+            </p>
 
-            <form id="scan-form">
-                <label for="target-url">TARGET URL</label>
-                <div class="input-row">
-                    <span class="url-icon">↗</span>
-                    <input id="target-url" name="url" type="url" placeholder="https://example.com" autocomplete="url"
-                        required>
-                    <button id="scan-button" type="submit">
-                        <span id="button-label">Run scan ↗</span>
+            <form id="scan-form" class="flex flex-col sm:flex-row gap-3">
+                <label for="target-url" class="sr-only">TARGET URL</label>
+                <div class="flex flex-1 items-center bg-[#1F2937] rounded-full ring-1 ring-white/10
+                            focus-within:ring-2 focus-within:ring-[#10B981] transition">
+                    <span class="pl-5 pr-1 text-[#6B7280] font-mono text-sm select-none">&gt;</span>
+                    <input id="target-url" name="url" type="url" required
+                           placeholder="https://example.com" autocomplete="url"
+                           class="flex-1 bg-transparent py-3 px-2 text-[#E5E7EB] placeholder-[#4B5563]
+                                  focus:outline-none font-mono text-sm">
+                    <button id="scan-button" type="submit"
+                            class="bg-[#10B981] hover:bg-[#0ea572] active:scale-95 text-[#0B1120]
+                                   font-semibold px-6 py-3 rounded-full mr-1 transition-all
+                                   disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="button-label">Run scan &#x2197;</span>
                     </button>
                 </div>
-                <p class="input-hint">Only scan authorized targets.</p>
             </form>
 
-            <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+            <p class="text-xs text-[#6B7280] mt-3">
+                &#x1F6C8; Only scan targets you are authorized to test.
+            </p>
+
+            <!-- Message box (hidden by default) -->
+            <div id="message" class="message hidden mt-4"></div>
         </section>
 
-        <section id="results" hidden>
-            <div class="results-heading">
+        <!-- ===== Results (hidden until scan completes) ===== -->
+        <section id="results" hidden class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <div class="eyebrow">SCAN REPORT</div>
-                    <h2>Security findings</h2>
-                    <p id="scan-meta" class="muted"></p>
+                    <p class="text-xs uppercase tracking-widest text-[#6B7280]">SCAN REPORT</p>
+                    <h2 class="text-2xl font-bold">Security findings</h2>
+                    <p id="scan-meta" class="text-sm text-[#9CA3AF] mt-1"></p>
                 </div>
-                <button id="download-button" class="secondary-button" type="button">
-                    ↓ Export JSON
+                <button id="download-button" disabled
+                        class="secondary-button inline-flex items-center gap-1 bg-[#1F2937]
+                               hover:bg-[#374151] text-[#9CA3AF] font-medium py-2 px-4 rounded-lg
+                               transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    &#x2193; Export JSON
                 </button>
             </div>
 
-            <div class="summary-grid">
-                <article class="summary-card">
-                    <span class="summary-label">TOTAL CHECKS</span>
-                    <strong id="total-count">0</strong>
+            <!-- Summary counters -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <article class="p-4 bg-[#1F2937] rounded-xl ring-1 ring-white/5">
+                    <span class="block text-xs text-[#9CA3AF] uppercase tracking-wide">Total</span>
+                    <strong id="total-count" class="block text-3xl font-bold mt-1">0</strong>
                 </article>
-                <article class="summary-card">
-                    <span class="summary-label">PASSED</span>
-                    <strong id="passed-count" class="green-text">0</strong>
+                <article class="p-4 bg-[#1F2937] rounded-xl ring-1 ring-white/5">
+                    <span class="block text-xs text-[#10B981] uppercase tracking-wide">Passed</span>
+                    <strong id="passed-count" class="block text-3xl font-bold mt-1 text-[#10B981]">0</strong>
                 </article>
-                <article class="summary-card">
-                    <span class="summary-label">WARNINGS</span>
-                    <strong id="warning-count" class="amber-text">0</strong>
+                <article class="p-4 bg-[#1F2937] rounded-xl ring-1 ring-white/5">
+                    <span class="block text-xs text-[#F59E0B] uppercase tracking-wide">Warnings</span>
+                    <strong id="warning-count" class="block text-3xl font-bold mt-1 text-[#F59E0B]">0</strong>
                 </article>
-                <article class="summary-card">
-                    <span class="summary-label">NEEDS REVIEW</span>
-                    <strong id="review-count" class="blue-text">0</strong>
+                <article class="p-4 bg-[#1F2937] rounded-xl ring-1 ring-white/5">
+                    <span class="block text-xs text-[#3B82F6] uppercase tracking-wide">Review</span>
+                    <strong id="review-count" class="block text-3xl font-bold mt-1 text-[#3B82F6]">0</strong>
                 </article>
             </div>
 
-            <div class="findings-panel">
-                <div class="findings-title">
-                    <h3>Detailed findings</h3>
-                    <span id="http-status" class="status-pill">HTTP —</span>
+            <!-- Findings list -->
+            <div class="bg-[#111827] rounded-xl p-5 ring-1 ring-white/5">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Detailed findings</h3>
+                    <span id="http-status-pill"
+                          class="px-3 py-1 rounded-full bg-[#1F2937] text-[#9CA3AF] font-mono text-sm
+                                 ring-1 ring-white/10">
+                        HTTP &mdash;
+                    </span>
                 </div>
-                <div id="findings-list"></div>
+                <div id="findings-list" class="space-y-3"></div>
             </div>
 
-            <p class="disclaimer">
+            <p class="text-xs text-[#6B7280] text-center">
                 These results identify configuration indicators, not confirmed
                 exploitable vulnerabilities. Review each finding in context.
             </p>
         </section>
 
-        <section class="info-grid">
-            <article class="info-card">
-                <span class="info-icon">⌁</span>
-                <h3>HTTPS & Headers</h3>
-                <p>Review HTTPS usage and common browser security headers.</p>
+        <!-- ===== Feature Cards ===== -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <article class="group p-6 bg-[#1F2937] rounded-2xl ring-1 ring-white/5
+                            hover:ring-[#10B981]/30 transition-all hover:-translate-y-1">
+                <div class="w-10 h-10 rounded-lg bg-[#10B981]/10 flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-1">HTTPS &amp; Headers</h3>
+                <p class="text-sm text-[#9CA3AF]">Review HTTPS usage and common browser security headers.</p>
             </article>
-            <article class="info-card">
-                <span class="info-icon">◈</span>
-                <h3>Cookie Checks</h3>
-                <p>Inspect Secure, HttpOnly and SameSite cookie attributes.</p>
+
+            <article class="group p-6 bg-[#1F2937] rounded-2xl ring-1 ring-white/5
+                            hover:ring-[#F59E0B]/30 transition-all hover:-translate-y-1">
+                <div class="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-1">Cookie Checks</h3>
+                <p class="text-sm text-[#9CA3AF]">Inspect Secure, HttpOnly and SameSite cookie attributes.</p>
             </article>
-            <article class="info-card">
-                <span class="info-icon">⌘</span>
-                <h3>CORS Review</h3>
-                <p>Identify basic cross-origin response-header indicators.</p>
+
+            <article class="group p-6 bg-[#1F2937] rounded-2xl ring-1 ring-white/5
+                            hover:ring-[#3B82F6]/30 transition-all hover:-translate-y-1">
+                <div class="w-10 h-10 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold mb-1">CORS Review</h3>
+                <p class="text-sm text-[#9CA3AF]">Identify basic cross-origin response-header indicators.</p>
             </article>
         </section>
-
-        <footer>
-            <span>SecureScan · Educational Security Project</span>
-            <span>Python · Flask · JavaScript</span>
-        </footer>
     </main>
-</body>
 
+    <!-- ===== Footer ===== -->
+    <footer class="border-t border-white/5 py-6 text-center text-xs text-[#4B5563]">
+        <p>SecureScan &middot; Educational Security Project</p>
+        <p class="mt-1">Python &middot; Flask &middot; JavaScript</p>
+    </footer>
+
+    <!-- App script (after DOM is ready) -->
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
 </html>

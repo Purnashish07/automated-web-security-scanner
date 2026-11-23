@@ -1,24 +1,27 @@
-
-# Python cache
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
 
-# Virtual environment
+# Virtual environments
 .venv/
+.testenv/
 venv/
 env/
 
-# Environment variables and secrets
+# Environment / secrets
 .env
 .env.*
 
 # Generated reports
 reports/
 
-# Test and editor files
+# Test / editor
 .pytest_cache/
 .vscode/
 
-# Microsoft Word temporary lock files
+# Word lock files
 ~$*.docx
+
+# Vercel local
+.vercel/
