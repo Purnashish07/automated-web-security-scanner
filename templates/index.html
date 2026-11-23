@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureScan | Web Security Scanner</title>
 
+    <!-- Suppress Tailwind Play CDN development notice in console -->
+    <script>
+        (function() {
+            var origWarn = console.warn;
+            console.warn = function() {
+                if (arguments[0] && typeof arguments[0] === 'string' && arguments[0].indexOf('cdn.tailwindcss.com') !== -1) return;
+                origWarn.apply(console, arguments);
+            };
+        })();
+    </script>
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -15,7 +25,7 @@
           rel="stylesheet">
 
     <!-- Custom CSS overrides -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('serve_static', filename='style.css') }}">
 
     <script>
         tailwind.config = {
@@ -205,7 +215,7 @@
         <p class="mt-1">Python &middot; Flask &middot; JavaScript</p>
     </footer>
 
-    <!-- App script (after DOM is ready) -->
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+    <!-- App script -->
+    <script src="{{ url_for('serve_static', filename='app.js') }}" defer></script>
 </body>
 </html>

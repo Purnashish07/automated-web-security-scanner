@@ -1,0 +1,73 @@
+/* =================================================================
+   SecureScan – custom CSS overrides (Tailwind handles the rest)
+   ================================================================= */
+
+/* --- Message box --- */
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+.message.hidden  { display: none; }
+.message.error   { background: #7f1d1d; color: #fecaca; }
+.message.success { background: #064e3b; color: #a7f3d0; }
+.message.info    { background: #1e3a5f; color: #93c5fd; }
+
+/* --- Severity / status badges --- */
+.severity-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+}
+.severity-badge.pass    { background: #064e3b; color: #6ee7b7; }
+.severity-badge.warning { background: #78350f; color: #fcd34d; }
+.severity-badge.review  { background: #1e3a5f; color: #93c5fd; }
+.severity-badge.info    { background: #1e3a5f; color: #93c5fd; }
+.severity-badge.low     { background: #064e3b; color: #6ee7b7; }
+.severity-badge.medium  { background: #78350f; color: #fcd34d; }
+.severity-badge.high    { background: #7f1d1d; color: #fca5a5; }
+
+/* --- Finding card --- */
+.finding-card {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: border-color 0.2s;
+}
+.finding-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* --- Finding heading --- */
+.finding-heading {
+    font-size: 0.95rem;
+}
+
+/* --- Recommendation text --- */
+.recommendation {
+    font-style: italic;
+}
+
+/* --- Buttons --- */
+.secondary-button {
+    background: #1f2937;
+}
+.secondary-button:hover {
+    background: #374151;
+}
+#download-button:disabled,
+.secondary-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* --- Info cards lift --- */
+.info-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.info-card:hover {
+    transform: translateY(-4px);
+}

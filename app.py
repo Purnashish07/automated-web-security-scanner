@@ -1,19 +1,50 @@
 import ipaddress
+import os
 import socket
 import time
 from collections import defaultdict, deque
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
 from security_scanner import scan_url, validate_url
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # ---------------------------------------------------------------------------
-# Flask app – static assets live under public/static/ for Vercel compat.
+# Flask app – configure static folder with absolute path
 # ---------------------------------------------------------------------------
-app = Flask(__name__, static_folder="public/static", static_url_path="/static")
+static_folder_path = os.path.join(BASE_DIR, "static")
+if not os.path.isdir(static_folder_path):
+    static_folder_path = os.path.join(BASE_DIR, "public", "static")
+
+app = Flask(__name__, static_folder=static_folder_path, static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
+
+
+# ---------------------------------------------------------------------------
+# Dedicated static file route: guarantees correct MIME types on Vercel
+# ---------------------------------------------------------------------------
+@app.route("/static/<path:filename>")
+def serve_static(filename):
+    search_dirs = [
+        os.path.join(BASE_DIR, "static"),
+        os.path.join(BASE_DIR, "public", "static"),
+        os.path.join(BASE_DIR, "public"),
+        os.path.join(os.getcwd(), "static"),
+        os.path.join(os.getcwd(), "public", "static"),
+    ]
+    for directory in search_dirs:
+        file_path = os.path.join(directory, filename)
+        if os.path.isfile(file_path):
+            mimetype = None
+            if filename.endswith(".css"):
+                mimetype = "text/css"
+            elif filename.endswith(".js"):
+                mimetype = "application/javascript"
+            return send_from_directory(directory, filename, mimetype=mimetype)
+    return jsonify({"error": "Static file not found"}), 404
 
 
 # ---------------------------------------------------------------------------
@@ -79,10 +110,8 @@ def _get_client_ip() -> str:
 def is_rate_limited(ip: str) -> bool:
     now = time.time()
     q = rate_limit_data[ip]
-    # Discard timestamps outside the window
     while q and now - q[0] > RATE_WINDOW:
         q.popleft()
-    # Clean up empty deques to prevent memory growth
     if not q:
         rate_limit_data.pop(ip, None)
     if len(q) >= RATE_LIMIT:
@@ -93,9 +122,11 @@ def is_rate_limited(ip: str) -> bool:
 
 @app.before_request
 def limit_requests():
-    client_ip = _get_client_ip()
-    if is_rate_limited(client_ip):
-        return jsonify({"error": "Rate limit exceeded. Try again later."}), 429
+    # Only rate-limit API calls, never static assets or root page
+    if request.path.startswith("/api/"):
+        client_ip = _get_client_ip()
+        if is_rate_limited(client_ip):
+            return jsonify({"error": "Rate limit exceeded. Try again later."}), 429
 
 
 @app.get("/api/health")
@@ -121,7 +152,6 @@ def add_security_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = ""
     return response
 
 
