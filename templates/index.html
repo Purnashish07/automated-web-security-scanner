@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b1020">
     <title>SecureScan | Web Security Scanner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/app.js" defer></script>
 </head>
 
 <body>
@@ -16,7 +16,7 @@
             <span class="brand-icon">盾</span>
             <span>SecureScan<span class="brand-dot">.</span></span>
         </a>
-        <span class="status-pill"><span class="status-dot"></span> LOCAL SECURITY LAB</span>
+        <span class="status-pill"><span class="status-dot"></span> HTTP <span id="http-status"></span></span>
     </header>
 
     <main class="container">
@@ -48,7 +48,7 @@
                         <span id="button-label">Run scan ↗</span>
                     </button>
                 </div>
-                <p class="input-hint">Only scan authorized targets. The scanner runs locally.</p>
+                <p class="input-hint">Only scan authorized targets.</p>
             </form>
 
             <div id="message" class="message" role="status" aria-live="polite" hidden></div>

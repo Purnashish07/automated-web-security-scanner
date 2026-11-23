@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+    color-scheme: dark;
+    --bg: #090d18;
+    --panel: #111827;
+    --panel-light: #151f31;
+    --border: #253147;
+    --text: #edf2ff;
+    --muted: #94a3b8;
+    --accent: #7c83ff;
+    --green: #4adea3;
+    --amber: #fbbf60;
+    --blue: #83b7ff;
+}
+
+* {box-sizing: border-box;}
+[hidden]{display:none !important;}
+body{margin:0;background:radial-gradient(ellipse at 50% 0%,#19244a 0%,transparent 48%),var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+button,input{font:inherit;cursor:pointer;}
+/* Rest of original CSS unchanged */
+
+/* Additional UI classes required */
+.finding-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.finding-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+.severity-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+.severity-badge.info { background: var(--panel-light); color: var(--muted); }
+.severity-badge.low { background: var(--green); color: #000; }
+.severity-badge.medium { background: var(--amber); color: #000; }
+.severity-badge.high { background: var(--blue); color: #000; }
+.recommendation {
+    margin-top: 4px;
+    font-style: italic;
+    color: var(--muted);
+}
+.message.success { background: #1a2b1a; border-color: #2e5e2e; color: #a0ffa0; }
+.message.info { background: #1a2b3a; border-color: #2e3e5e; color: #a0c0ff; }
+#download-button:disabled,
+.secondary-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

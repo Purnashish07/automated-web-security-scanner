@@ -72,6 +72,179 @@ def get_set_cookie_headers(response):
 
 
 def scan_url(url, timeout=10):
+    """Scan a URL with manual redirect handling and header analysis.
+    Returns a dict with findings, status code, final URL, HTTPS usage,
+    and a redirect chain. Errors are reported with a generic message.
+    """
+    # Validate initial URL format
+    validate_url(url)
+
+    # Helper to validate that a URL resolves to a public IP (same logic as app.validate_public_target)
+    def _validate_public_target(target_url):
+        parsed = urlparse(target_url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            raise ValueError("Enter a complete URL beginning with http:// or https://")
+        if parsed.username or parsed.password:
+            raise ValueError("Do not include usernames or passwords in the URL.")
+        try:
+            addresses = socket.getaddrinfo(
+                parsed.hostname,
+                parsed.port or (443 if parsed.scheme == "https" else 80),
+                type=socket.SOCK_STREAM,
+            )
+        except socket.gaierror:
+            raise ValueError("The hostname could not be resolved.")
+        if not addresses:
+            raise ValueError("The hostname has no usable IP addresses.")
+        for address in {item[4][0] for item in addresses}:
+            ip = ipaddress.ip_address(address)
+            if not ip.is_global:
+                raise ValueError("Only publicly routable target addresses are allowed.")
+        return target_url
+
+    findings = []
+    result = {
+        "target": url,
+        "scanned_at_utc": datetime.now(timezone.utc).isoformat(),
+        "status_code": None,
+        "final_url": None,
+        "https_used": urlparse(url).scheme == "https",
+        "findings": findings,
+        "error": None,
+        "redirect_chain": [],
+    }
+
+    max_hops = 5
+    current_url = url
+    try:
+        for hop in range(max_hops + 1):
+            _validate_public_target(current_url)
+            response = requests.get(
+                current_url,
+                timeout=timeout,
+                stream=True,
+                allow_redirects=False,
+                headers={"User-Agent": "BeginnerWebSecurityScanner/1.0"},
+            )
+            result["status_code"] = response.status_code
+            result["final_url"] = response.url
+            result["https_used"] = urlparse(response.url).scheme == "https"
+
+            if response.is_redirect or response.is_permanent_redirect:
+                location = response.headers.get("Location")
+                if location:
+                    next_url = requests.compat.urljoin(current_url, location)
+                    result["redirect_chain"].append({"from": current_url, "to": next_url, "status": response.status_code})
+                    current_url = next_url
+                    response.close()
+                    continue
+            break
+    except Exception as exc:
+        result["error"] = "Could not reach the target"
+        return result
+
+    # Analyze only headers; body is not read because stream=True
+    headers_lower = {k.lower(): v for k, v in response.headers.items()}
+
+    # HTTPS check based on final URL
+    if urlparse(url).scheme == "https":
+        add_finding(findings, "HTTPS", "Info", "PASS", "The supplied URL uses HTTPS.")
+    elif result["https_used"]:
+        add_finding(findings, "HTTPS", "Info", "PASS", "The HTTP URL redirected to HTTPS.")
+    else:
+        add_finding(
+            findings,
+            "HTTPS",
+            "High",
+            "WARNING",
+            "The final URL does not use HTTPS.",
+            "Configure HTTPS and redirect HTTP traffic to HTTPS.",
+        )
+
+    # Header checks
+    for header, info in SECURITY_HEADERS.items():
+        if header in headers_lower:
+            add_finding(findings, header, "Info", "PASS", f"Header is present: {headers_lower[header]}")
+        else:
+            severity = info["severity"]
+            if header == "strict-transport-security" and not result["https_used"]:
+                add_finding(
+                    findings,
+                    header,
+                    "Info",
+                    "REVIEW",
+                    "HSTS was not evaluated because the final URL is not HTTPS.",
+                    "Enable HTTPS first, then review HSTS configuration.",
+                )
+            else:
+                add_finding(findings, header, severity, "WARNING", info["description"], info["recommendation"])
+
+    # CORS checks
+    allow_origin = headers_lower.get("access-control-allow-origin")
+    allow_credentials = headers_lower.get("access-control-allow-credentials", "").strip().lower()
+    if not allow_origin:
+        add_finding(
+            findings,
+            "CORS",
+            "Info",
+            "REVIEW",
+            "No Access-Control-Allow-Origin header was observed.",
+            "Confirm whether cross-origin access is required for this application.",
+        )
+    elif allow_origin.strip() == "*" and allow_credentials == "true":
+        add_finding(
+            findings,
+            "CORS",
+            "High",
+            "WARNING",
+            "Wildcard origin and credentials=true were both observed.",
+            "Review the CORS policy. Browsers reject this combination for credentialed CORS, but it may indicate a configuration error.",
+        )
+    elif allow_origin.strip() == "*":
+        add_finding(
+            findings,
+            "CORS",
+            "Low",
+            "REVIEW",
+            "Wildcard origin is configured.",
+            "Use an explicit origin allowlist if cross-origin access should be restricted.",
+        )
+    else:
+        add_finding(
+            findings,
+            "CORS",
+            "Info",
+            "REVIEW",
+            f"Access-Control-Allow-Origin is set to: {allow_origin}",
+            "Verify that the allowed origin is intentional. This basic check does not validate the full CORS policy.",
+        )
+
+    # Cookie checks
+    cookies = get_set_cookie_headers(response)
+    if not cookies:
+        add_finding(
+            findings,
+            "Cookies",
+            "Info",
+            "REVIEW",
+            "No Set-Cookie header was observed in this response.",
+        )
+    else:
+        for idx, cookie in enumerate(cookies, start=1):
+            parts = [p.strip() for p in cookie.split(";")]
+            attributes = {p.split("=", 1)[0].strip().lower() for p in parts[1:] if p}
+            cookie_name = parts[0].split("=", 1)[0] if parts else f"Cookie {idx}"
+            for attr, rec in [
+                ("secure", "Set Secure on cookies that should only travel over HTTPS."),
+                ("httponly", "Set HttpOnly on cookies that do not need JavaScript access."),
+                ("samesite", "Set an appropriate SameSite attribute based on application needs."),
+            ]:
+                if attr in attributes:
+                    add_finding(findings, f"Cookie: {cookie_name}", "Info", "PASS", f"{attr} attribute is present.")
+                else:
+                    add_finding(findings, f"Cookie: {cookie_name}", "Low", "WARNING", f"{attr} attribute was not observed.", rec)
+    response.close()
+    return result
     validate_url(url)
 
     findings = []

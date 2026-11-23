@@ -1,4 +1,3 @@
-
 const form = document.getElementById("scan-form");
 const targetInput = document.getElementById("target-url");
 const scanButton = document.getElementById("scan-button");
@@ -83,7 +82,7 @@ function displayScan(data) {
     const statusElement = document.getElementById("http-status");
     if (statusElement) {
         statusElement.textContent =
-            data.status_code != null ? String(data.status_code) : "N/A";
+            data.status_code != null ? `HTTP ${data.status_code}` : "N/A";
     }
 
     scanMeta.textContent =

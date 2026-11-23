@@ -1,0 +1,8 @@
+.venv
+.git
+reports
+*.docx
+generate_report.py
+report-requirements.txt
+__pycache__
+.env*
