@@ -1,152 +1,169 @@
-# Automated Web Security Scanner
+# SecureScan — Automated Web Security Scanner
 
-A lightweight Python-based web security configuration scanner built with Flask, Requests, HTML, CSS, and JavaScript.
+![SecureScan Project Banner](demo-video/SecureScan_Thumbnail.png)
 
-## Project Overview
+A lightweight, production-ready Python web security configuration scanner built with **Flask**, **Requests**, **Tailwind CSS**, and **Vanilla JavaScript**.
 
-Automated Web Security Scanner helps users review basic website security configurations through a web dashboard. It checks HTTPS usage, common HTTP security headers, basic CORS response headers, and cookie security attributes.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-00ffcc?style=for-the-badge&logo=vercel)](https://automated-web-security-scanner-abxd.vercel.app/)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-This project is intended for educational purposes and authorized security testing. Findings are configuration indicators, not confirmation of exploitable vulnerabilities.
+---
 
-## Features
+## 🌐 Live Application
 
-- HTTPS usage check
-- Security header checks:
-  - Content-Security-Policy (CSP)
-  - Strict-Transport-Security (HSTS)
-  - X-Content-Type-Options
-  - X-Frame-Options
-  - Referrer-Policy
-- Cookie attribute review: Secure, HttpOnly, and SameSite
-- Basic CORS configuration review
-- Dashboard showing PASS, WARNING, and REVIEW findings
-- JSON report export
-- SSRF protection (private IP rejection)
-- In-memory rate limiting
-- Flask backend with Tailwind CSS frontend
+- **Live URL**: [https://automated-web-security-scanner-abxd.vercel.app/](https://automated-web-security-scanner-abxd.vercel.app/)
+- **GitHub Repository**: [https://github.com/Purnashish07/automated-web-security-scanner](https://github.com/Purnashish07/automated-web-security-scanner)
 
-## Technology Stack
+---
 
-- Python 3.12
-- Flask
-- Requests
-- HTML5 / Tailwind CSS
-- JavaScript
-- Vercel (deployment)
+## 🎥 Project Demonstration & Video Assets
 
-## Project Structure
+A complete 1080p Full HD video presentation and AI-narrated walkthrough is included in the [`demo-video/`](demo-video/) directory:
+
+- 🎬 **Video Walkthrough**: [`demo-video/SecureScan_Demo_1080p.mp4`](demo-video/SecureScan_Demo_1080p.mp4) (1080p Full HD, 3:21 duration, synchronized subtitles and ambient score)
+- 🎙️ **AI Voiceover Audio**: [`demo-video/SecureScan_Voiceover.mp3`](demo-video/SecureScan_Voiceover.mp3) (Clear American male voiceover using `en-US-ChristopherNeural`)
+- 📜 **Official Script**: [`demo-video/SecureScan_Demo_Script.txt`](demo-video/SecureScan_Demo_Script.txt) (Full timed narration script with visual cues)
+- 🖼️ **Project Thumbnail**: [`demo-video/SecureScan_Thumbnail.png`](demo-video/SecureScan_Thumbnail.png) (High-resolution cybersecurity SaaS banner)
+
+---
+
+## 📌 Project Overview
+
+**SecureScan** helps developers, security students, and system administrators audit critical website security configurations through an intuitive, dark-mode cybersecurity dashboard. It passively inspects HTTPS usage, common browser security headers, CORS response headers, and cookie protection attributes.
+
+> **Ethical Note**: This project performs **passive configuration analysis** and does not conduct invasive penetration testing or exploit vulnerabilities. Always obtain explicit permission before scanning target websites.
+
+---
+
+## 🛡️ Key Features
+
+- **HTTPS & SSL/TLS Verification**: Confirms encrypted transport protocols and tracks redirect chains.
+- **Security Header Auditing**:
+  - `Content-Security-Policy` (CSP) — Mitigates Cross-Site Scripting (XSS) and injection attacks.
+  - `Strict-Transport-Security` (HSTS) — Enforces HTTPS connections and prevents downgrade attacks.
+  - `X-Content-Type-Options` — Blocks MIME-type sniffing.
+  - `X-Frame-Options` — Protects against clickjacking.
+  - `Referrer-Policy` — Governs referrer metadata leakage.
+- **Cookie Security Checks**: Inspects `Secure`, `HttpOnly`, and `SameSite` attributes across all `Set-Cookie` directives.
+- **CORS Configuration Review**: Identifies overly permissive wildcard origins (`*`) paired with credentials.
+- **SSRF Defense**: Built-in pre-flight DNS validation rejects loopback (`127.0.0.1`), private subnets (`10.0.0.0/8`, `192.168.0.0/16`), and link-local targets.
+- **Rate Limiting**: In-memory token bucket protects the API against abusive traffic.
+- **One-Click JSON Export**: Download standardized audit data ready for reporting and CI/CD pipelines.
+
+---
+
+## 🏗️ Technology Stack
+
+- **Backend**: Python 3.12, Flask, Requests
+- **Frontend**: HTML5, Tailwind CSS, Vanilla JavaScript
+- **Testing**: Pytest, Requests-Mock
+- **Deployment**: Vercel Serverless Functions
+- **Multimedia Production**: FFmpeg, Pillow, Edge-TTS, Selenium
+
+---
+
+## 📂 Project Structure
 
 ```text
 automated-web-security-scanner/
-├── app.py                  # Flask application (Vercel entrypoint)
-├── security_scanner.py     # Scanning engine
-├── requirements.txt        # Production dependencies
-├── dev-requirements.txt    # Test dependencies (pytest, requests-mock)
-├── vercel.json             # Vercel deployment config
-├── .python-version         # Python version pin (3.12)
+├── app.py                     # Flask application (Vercel entrypoint)
+├── security_scanner.py        # Core scanning and validation engine
+├── requirements.txt           # Production dependencies
+├── dev-requirements.txt       # Testing dependencies (pytest, requests-mock)
+├── vercel.json                # Vercel deployment configuration
+├── .python-version            # Python version pin (3.12)
 ├── .gitignore
 ├── .vercelignore
 ├── README.md
+├── assemble_video.py          # Video production pipeline script
+├── capture_frames.py          # Automated UI screenshot capture tool
+├── generate_voiceover.py      # AI voiceover generation script
+├── demo-video/                # Video demonstration deliverables
+│   ├── SecureScan_Demo_1080p.mp4
+│   ├── SecureScan_Thumbnail.png
+│   ├── SecureScan_Voiceover.mp3
+│   └── SecureScan_Demo_Script.txt
 ├── templates/
-│   └── index.html          # Jinja2 template (Tailwind CSS)
+│   └── index.html             # Dashboard UI (Tailwind CSS)
 ├── public/
 │   └── static/
-│       ├── style.css       # Custom CSS overrides
-│       └── app.js          # Frontend client script
+│       ├── style.css          # Theme overrides & severity badge styles
+│       └── app.js             # Async client fetch, render, and export logic
 └── tests/
-    ├── conftest.py         # Shared test fixtures
-    ├── test_validation.py  # URL validation tests
-    ├── test_ip_rejection.py# SSRF / private-IP tests
-    └── test_api.py         # Flask route tests
+    ├── conftest.py            # Pytest test client fixtures
+    ├── test_validation.py     # URL validation unit tests
+    ├── test_ip_rejection.py   # SSRF / private IP rejection tests
+    └── test_api.py            # Flask REST API endpoint tests
 ```
 
-## Installation
+---
 
-1. Install Python 3.12+.
-2. Open a terminal in the project directory.
-3. Create a virtual environment:
+## 🚀 Installation & Local Development
 
-   ```bash
-   python -m venv .venv
-   ```
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Purnashish07/automated-web-security-scanner.git
+cd automated-web-security-scanner
+```
 
-4. Activate it:
+### 2. Set Up a Virtual Environment
+```bash
+# Windows
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-   ```bash
-   # Windows PowerShell
-   .\.venv\Scripts\Activate.ps1
+# Linux / macOS
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-   # macOS / Linux
-   source .venv/bin/activate
-   ```
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt -r dev-requirements.txt
+```
 
-5. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Run the Application
-
-Start the local Flask server:
-
+### 4. Run the Development Server
 ```bash
 python app.py
 ```
+Visit **`http://127.0.0.1:5000`** in your browser.
 
-Open <http://127.0.0.1:5000> in your browser.
+---
 
-Enter a website URL you own or have explicit permission to test, then click **Run scan**. Use **Export JSON** to save the results.
+## 🧪 Running Automated Tests
 
-## Running Tests
+Run the full pytest suite (17 comprehensive tests for validation, SSRF guards, rate limits, and scan mocks):
 
 ```bash
-pip install -r dev-requirements.txt
 python -m pytest -v
 ```
 
-## Deploy to Vercel
+---
 
-1. Install the [Vercel CLI](https://vercel.com/docs/cli):
+## ☁️ Deploying to Vercel
 
-   ```bash
-   npm i -g vercel
-   ```
+```bash
+# Install Vercel CLI (if not installed)
+npm i -g vercel
 
-2. Log in:
+# Deploy to production
+vercel --prod
+```
 
-   ```bash
-   vercel login
-   ```
+---
 
-3. Deploy:
+## 📊 Understanding Results
 
-   ```bash
-   vercel --prod
-   ```
+- **PASS**: The tested security indicator is properly configured.
+- **WARNING**: A recommended security header or attribute is missing or misconfigured.
+- **REVIEW**: Contextual check (e.g. CORS origin configuration) requiring manual confirmation.
 
-Vercel will auto-detect the Python/Flask build from `vercel.json`.
+---
 
-## Understanding Results
+## 👤 Author
 
-- **PASS**: The tested configuration indicator was observed.
-- **WARNING**: A recommended security header or configuration indicator was missing or needs attention.
-- **REVIEW**: The result needs contextual review and is not necessarily a vulnerability.
-
-A scan checks only the indicators implemented in this project. It is not a complete penetration test or guarantee of security.
-
-## Ethical Use and Limitations
-
-- Scan only websites you own or have explicit permission to test.
-- Findings may depend on redirects, application behavior, and server configuration.
-- A missing header does not by itself prove a vulnerability.
-- Do not use this tool as a substitute for a professional security assessment.
-
-## Author
-
-Purnashish Atroliya
-Madhav Institute of Technology and Science, Gwalior
-
-## Project Purpose
-
-Developed as an educational project for the IBM SkillsBuild Cyber Security BootCamp 2026.
+**Purnashish Atroliya**  
+*Madhav Institute of Technology and Science (MITS), Gwalior*  
+*Developed for the IBM SkillsBuild Cyber Security BootCamp 2026*  
+GitHub: [@Purnashish07](https://github.com/Purnashish07)

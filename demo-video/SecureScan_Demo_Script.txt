@@ -1,0 +1,74 @@
+================================================================================
+SecureScan – Automated Web Security Scanner
+Official Demonstration Video Script & Narration (2 Minutes 40 Seconds)
+================================================================================
+
+[VOICE PROFILE]
+Voice: Male, American Accent (en-US-ChristopherNeural)
+Tone: Confident, Authoritative, Engaging, Professional Cybersecurity Presentation
+Pacing: Measured, Natural, Clear Articulation
+
+--------------------------------------------------------------------------------
+SECTION 1: TITLE & OPENING HOOK (0:00 – 0:15)
+--------------------------------------------------------------------------------
+[VISUAL: Futuristic cyber title card with SecureScan shield logo, glowing neon accents, and animated grid background]
+
+NARRATION:
+"Hello everyone! Today, I am proud to present SecureScan—an automated web security configuration scanner designed to assess and elevate the security posture of modern web applications."
+
+--------------------------------------------------------------------------------
+SECTION 2: THE PROBLEM & INTRO (0:15 – 0:42)
+--------------------------------------------------------------------------------
+[VISUAL: Transition to cybersecurity landscape graphic, illustrating OWASP Top 10 security misconfigurations, missing headers, and cookie exposure]
+
+NARRATION:
+"In today's interconnected digital landscape, web application security is more critical than ever. Often, severe vulnerabilities stem not from complex code flaws, but from fundamental security misconfigurations—such as absent defense-in-depth headers, unhardened cookies, and permissive CORS policies.
+
+SecureScan simplifies this assessment by providing an intuitive, automated platform that passively inspects a target's HTTP response headers, cookie flags, and SSL configurations in real time—delivering immediate actionable insights without intrusive exploitation."
+
+--------------------------------------------------------------------------------
+SECTION 3: LIVE DEMO & SCAN EXECUTION (0:42 – 1:28)
+--------------------------------------------------------------------------------
+[VISUAL: Smooth pan into the live SecureScan dashboard. Highlight the dark cyber theme, the READY status indicator, and the unified target URL search bar]
+
+NARRATION:
+"Here is the live SecureScan application. The interface features a clean, responsive cyber-themed dashboard built with Flask and modern CSS, displaying a live status indicator at the top right.
+
+Starting an audit is effortless. Simply input the authorized target URL into the search field. The scanner includes built-in Server-Side Request Forgery safeguards, automatically verifying that the target resolves to a publicly routable IP address and blocking internal network scanning.
+
+Once we click 'Run Scan', SecureScan initiates a lightweight, non-destructive audit. It inspects redirects, analyzes SSL/TLS implementation, and parses the complete HTTP response structure within seconds."
+
+--------------------------------------------------------------------------------
+SECTION 4: RESULTS & VULNERABILITY ANALYSIS (1:28 – 2:15)
+--------------------------------------------------------------------------------
+[VISUAL: The scan results smoothly reveal. Camera zooms into summary metrics: Total Checks, Passed, Warnings, and Needs Review, then scrolls down through individual finding cards]
+
+NARRATION:
+"As the scan finishes, SecureScan immediately organizes the output into a structured security report.
+
+At the top, four clear metric cards provide a high-level summary: Total Checks performed, Passed configurations, Warnings requiring remediation, and items categorized for contextual review.
+
+Diving into the detailed findings, each issue is classified with clear severity badges:
+First, HTTPS verification confirms the transport layer is encrypted with a PASS badge.
+Next, our header audit identifies key missing protections—such as Content-Security-Policy to mitigate Cross-Site Scripting, and HTTP Strict Transport Security to enforce encrypted connections, both flagged as Medium severity with concrete remediation guidance.
+We also see evaluations for X-Frame-Options against clickjacking, X-Content-Type-Options against MIME sniffing, along with detailed cookie attribute checks and Cross-Origin Resource Sharing reviews.
+
+Every scan report can be exported directly as a standardized JSON document with a single click—ideal for automated CI/CD pipelines and security documentation."
+
+--------------------------------------------------------------------------------
+SECTION 5: ARCHITECTURE & CONCLUSION (2:15 – 2:40)
+--------------------------------------------------------------------------------
+[VISUAL: Smooth scroll to the three feature cards—HTTPS & Headers, Cookie Checks, and CORS Review—followed by a clean closing outro and portfolio links]
+
+NARRATION:
+"SecureScan is architected around three essential security pillars: automated HTTPS and header enforcement, cookie attribute compliance, and cross-origin access verification.
+
+By combining lightweight passive scanning, strict SSRF defenses, and a modern, developer-friendly interface, SecureScan empowers developers, security students, and administrators to catch configuration oversights before attackers do.
+
+Thank you for watching, and stay secure!"
+
+================================================================================
+Generated for: Purnashish Atroliya | SecureScan Project Demonstration
+Repository: https://github.com/Purnashish07/automated-web-security-scanner
+Live Application: https://automated-web-security-scanner-abxd.vercel.app/
+================================================================================
