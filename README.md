@@ -1,4 +1,4 @@
-﻿# Automated Web Security Scanner
+# Automated Web Security Scanner
 
 A lightweight Python-based web security configuration scanner built with Flask, Requests, HTML, CSS, and JavaScript.
 
