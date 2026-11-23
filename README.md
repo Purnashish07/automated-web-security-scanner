@@ -4,7 +4,7 @@
 
 A lightweight, production-ready Python web security configuration scanner built with **Flask**, **Requests**, **Tailwind CSS**, and **Vanilla JavaScript**.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-00ffcc?style=for-the-badge&logo=vercel)]([https://automated-web-security-scanner-abxd.vercel.app/](https://automated-web-security-scanner-v1ab.vercel.app/))
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-00ffcc?style=for-the-badge&logo=vercel)]([[https://automated-web-security-scanner-abxd.vercel.app/](https://automated-web-security-scanner-v1ab.vercel.app/)](https://automated-web-security-scanner-v1ab.vercel.app/))
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
