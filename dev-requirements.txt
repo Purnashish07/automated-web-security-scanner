@@ -1,2 +1,2 @@
-pytest
-requests-mock
+pytest>=8.0
+requests-mock>=1.12
